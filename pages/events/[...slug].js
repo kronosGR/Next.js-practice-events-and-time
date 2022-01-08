@@ -1,4 +1,8 @@
-import { Fragment, useEffect, useState } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useState
+} from 'react';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
@@ -10,12 +14,15 @@ import ErrorAlert from '../../components/ui/error-alert';
 import Head from 'next/head';
 
 function FilteredEventsPage(props) {
-  const [loadedEvents, setLoadedEvents] = useState();
+  const [ loadedEvents, setLoadedEvents ] = useState();
   const router = useRouter();
 
   const filterData = router.query.slug;
 
-  const { data, error } = useSWR(
+  const {
+    data,
+    error
+  } = useSWR(
     'https://events-88a2e-default-rtdb.firebaseio.com/events.json'
   );
 
@@ -32,10 +39,21 @@ function FilteredEventsPage(props) {
 
       setLoadedEvents(events);
     }
-  }, [data]);
+  }, [ data ]);
+
+  const pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta name="description" content="A list of filtered events"/>
+    </Head>
+  );
+
 
   if (!loadedEvents) {
-    return <p className='center'>Loading...</p>;
+    return <Fragment>
+      {pageHeadData}
+      <p className="center">Loading...</p>
+    </Fragment>
   }
 
   const filteredYear = filterData[0];
@@ -43,6 +61,13 @@ function FilteredEventsPage(props) {
 
   const numYear = +filteredYear;
   const numMonth = +filteredMonth;
+
+  pageHeadData = (
+    <Head>
+      <title>Filtered Events</title>
+      <meta name="description" content={`All events for ${numMonth}/${numYear}`}/>
+    </Head>
+  );
 
   if (
     isNaN(numYear) ||
@@ -55,11 +80,12 @@ function FilteredEventsPage(props) {
   ) {
     return (
       <Fragment>
+        {pageHeadData}
         <ErrorAlert>
           <p>Invalid filter. Please adjust your values!</p>
         </ErrorAlert>
-        <div className='center'>
-          <Button link='/events'>Show All Events</Button>
+        <div className="center">
+          <Button link="/events">Show All Events</Button>
         </div>
       </Fragment>
     );
@@ -76,11 +102,12 @@ function FilteredEventsPage(props) {
   if (!filteredEvents || filteredEvents.length === 0) {
     return (
       <Fragment>
+        {pageHeadData}
         <ErrorAlert>
           <p>No events found for the chosen filter!</p>
         </ErrorAlert>
-        <div className='center'>
-          <Button link='/events'>Show All Events</Button>
+        <div className="center">
+          <Button link="/events">Show All Events</Button>
         </div>
       </Fragment>
     );
@@ -90,12 +117,9 @@ function FilteredEventsPage(props) {
 
   return (
     <Fragment>
-      <Head>
-        <title>Filtered Events</title>
-        <meta name="description" content={`All events for ${numMonth}/${numYear}`} />
-      </Head>
-      <ResultsTitle date={date} />
-      <EventList items={filteredEvents} />
+      {pageHeadData}
+      <ResultsTitle date={date}/>
+      <EventList items={filteredEvents}/>
     </Fragment>
   );
 }
